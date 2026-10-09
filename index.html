@@ -50,6 +50,13 @@
   .shots figcaption { font: 12px var(--mono); color: var(--text3); margin-top: 8px; }
   .wide { grid-column: 1 / -1; }
 
+  .hero-video { margin: 8px 0 44px; }
+  video { width: 100%; height: auto; aspect-ratio: 16 / 9; display: block; border-radius: 12px; border: 1px solid var(--sep); background: #111113; }
+  .clips { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 22px 16px; }
+  .clips figure { margin: 0; }
+  .clips h3 { font-size: 16px; margin: 12px 0 4px; }
+  .clips p { margin: 0; color: var(--text2); font-size: 14px; }
+
   ul.plain { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
   ul.plain li { display: flex; gap: 10px; color: var(--text2); }
   ul.plain li::before { content: "·"; color: var(--mint); font-weight: 700; }
@@ -72,6 +79,39 @@
     </a>
     <span class="meta">macOS 26 or later · Apple Silicon and Intel · free</span>
   </header>
+
+  <div class="hero-video">
+    <video controls playsinline preload="metadata" poster="assets/video/hero.jpg" aria-label="slopcode in 40 seconds: an exercise opens while Claude Code works">
+      <source src="assets/video/hero.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <section>
+    <p class="label">In action</p>
+    <h2>See it while your agent works</h2>
+    <div class="clips">
+      <figure>
+        <video class="clip" muted loop playsinline preload="none" poster="assets/video/agent-works.jpg" aria-label="An exercise opens next to the terminal while Claude Code works"><source src="assets/video/agent-works.mp4" type="video/mp4"></video>
+        <h3>Reps while your agent works</h3>
+        <p>Claude Code starts a task and a short exercise opens next to your terminal. Run the tests with ⌘R.</p>
+      </figure>
+      <figure>
+        <video class="clip" muted loop playsinline preload="none" poster="assets/video/your-codebase.jpg" aria-label="A find-the-bug exercise built from a file in the project"><source src="assets/video/your-codebase.mp4" type="video/mp4"></video>
+        <h3>Exercises from your own code</h3>
+        <p>Inspired by the files your agent is touching, rewritten from scratch. Your project is only read, never changed.</p>
+      </figure>
+      <figure>
+        <video class="clip" muted loop playsinline preload="none" poster="assets/video/menu-bar.jpg" aria-label="The menu bar shows the agent waiting for a permission"><source src="assets/video/menu-bar.mp4" type="video/mp4"></video>
+        <h3>It follows your agent from the menu bar</h3>
+        <p>When the agent needs you, the icon tells you. The exercise waits where you left it.</p>
+      </figure>
+      <figure>
+        <video class="clip" muted loop playsinline preload="none" poster="assets/video/grow.jpg" aria-label="The mascot grows through its four stages"><source src="assets/video/grow.mp4" type="video/mp4"></video>
+        <h3>Every wait you use grows your slop</h3>
+        <p>Mastery per concept, spaced reviews and a mascot that grows with the hours you win back.</p>
+      </figure>
+    </div>
+  </section>
 
   <section>
     <p class="label">How it works</p>
@@ -137,5 +177,18 @@
     © 2026 slopcode · made for people waiting on an agent · <a href="https://github.com/federix-ai/slopcode-app/releases">all releases</a>
   </footer>
 </main>
+<script>
+  // Clips play muted while on screen; with reduced motion they get controls instead.
+  const clips = document.querySelectorAll('video.clip');
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+    clips.forEach(v => { v.controls = true; });
+  } else {
+    const io = new IntersectionObserver(entries => entries.forEach(e => {
+      if (e.isIntersecting) e.target.play().catch(() => { e.target.controls = true; });
+      else e.target.pause();
+    }), { threshold: 0.5 });
+    clips.forEach(v => io.observe(v));
+  }
+</script>
 </body>
 </html>
