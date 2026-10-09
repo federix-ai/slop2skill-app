@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>slopcode</title>
+<meta name="description" content="Esercizi di programmazione mentre l'agente lavora. App per la barra dei menu di macOS.">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<style>
+  :root {
+    --bg: #FAFAFA; --surface: #FFFFFF; --text: #1D1D1F; --text2: rgba(0,0,0,0.58); --text3: rgba(0,0,0,0.36);
+    --sep: rgba(0,0,0,0.08); --fill: rgba(0,0,0,0.045); --accent: #007AFF; --mint: #3E9F7A; --mint-text: #1F6B50;
+    --amber-bg: rgba(255,159,10,0.13); --amber-text: #7A4300;
+    --mono: "SF Mono", ui-monospace, Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1E1E20; --surface: #28282A; --text: rgba(255,255,255,0.92); --text2: rgba(255,255,255,0.58); --text3: rgba(255,255,255,0.32);
+      --sep: rgba(255,255,255,0.08); --fill: rgba(255,255,255,0.06); --accent: #0A84FF; --mint: #7FD8B4; --mint-text: #A6EBCF;
+      --amber-bg: rgba(255,179,64,0.13); --amber-text: #FFD08A;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+  main { max-width: 960px; margin: 0 auto; padding: 0 16px 64px; }
+  .label { font: 600 11px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin: 0 0 12px; }
+  a { color: var(--accent); }
+
+  header { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 72px 0 40px; gap: 14px; }
+  header img { width: 128px; height: 128px; }
+  h1 { font-size: 40px; line-height: 1.1; letter-spacing: -0.02em; margin: 6px 0 0; }
+  .tagline { font-size: 19px; color: var(--text2); margin: 0; max-width: 560px; }
+  .download { display: inline-flex; align-items: center; gap: 10px; margin-top: 14px; padding: 12px 22px; border-radius: 10px;
+              background: var(--accent); color: #fff; font: 600 16px var(--sans); text-decoration: none; }
+  .download small { font: 12px var(--mono); opacity: 0.8; }
+  .meta { font: 12px var(--mono); color: var(--text3); }
+
+  section { padding: 36px 0; border-top: 1px solid var(--sep); }
+  h2 { font-size: 24px; letter-spacing: -0.015em; margin: 0 0 18px; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .card { background: var(--fill); border-radius: 12px; padding: 18px; }
+  .card .num { font: 600 12px var(--mono); color: var(--mint-text); }
+  .card h3 { font-size: 16px; margin: 6px 0 6px; }
+  .card p { margin: 0; color: var(--text2); font-size: 14px; }
+
+  .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: start; }
+  .shots figure { margin: 0; }
+  .shots img { width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--sep); display: block; }
+  .shots figcaption { font: 12px var(--mono); color: var(--text3); margin-top: 8px; }
+  .wide { grid-column: 1 / -1; }
+
+  ul.plain { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  ul.plain li { display: flex; gap: 10px; color: var(--text2); }
+  ul.plain li::before { content: "·"; color: var(--mint); font-weight: 700; }
+  code { font: 13px var(--mono); background: var(--fill); padding: 1px 5px; border-radius: 4px; }
+
+  .notice { background: var(--amber-bg); color: var(--amber-text); border-radius: 10px; padding: 14px 16px; font-size: 14px; }
+  ol { padding-left: 20px; color: var(--text2); }
+  ol li { margin-bottom: 6px; }
+  footer { text-align: center; font: 12px var(--mono); color: var(--text3); padding-top: 28px; border-top: 1px solid var(--sep); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img src="assets/icon.png" alt="Icona di slopcode: la mascotte su uno squircle scuro">
+    <h1>slopcode</h1>
+    <p class="tagline">Esercizi di programmazione mentre l'agente lavora. Quando Claude Code pensa, tu ti alleni.</p>
+    <a class="download" href="https://github.com/federix-ai/slopcode-app/releases/latest/download/slopcode.zip">
+      Scarica per macOS <small>v1.0.0 · zip</small>
+    </a>
+    <span class="meta">macOS 26 o successivo · Apple Silicon e Intel · gratis</span>
+  </header>
+
+  <section>
+    <p class="label">Come funziona</p>
+    <h2>L'attesa dell'agente diventa allenamento</h2>
+    <div class="steps">
+      <div class="card"><span class="num">01</span><h3>L'agente lavora</h3><p>slopcode si accorge che Claude Code (o Codex) sta lavorando e apre una finestra stretta accanto al terminale, senza rubarti il cursore.</p></div>
+      <div class="card"><span class="num">02</span><h3>Un esercizio breve</h3><p>Scrivi una funzione, trova il bug o rispondi a una domanda in Python, Swift o Kotlin. I test girano sul tuo Mac.</p></div>
+      <div class="card"><span class="num">03</span><h3>Cresci con il tempo recuperato</h3><p>Padronanza per concetto, ripassi distanziati, una streak senza ansia e una mascotte che cresce con le ore di attesa usate.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">Schermate</p>
+    <div class="shots">
+      <figure><img src="assets/finestra.png" alt="Finestra dell'esercizio con l'agente che aspetta una risposta" loading="lazy"><figcaption>La finestra dell'esercizio</figcaption></figure>
+      <figure><img src="assets/menu.png" alt="Menu nella barra dei menu con due sessioni dell'agente" loading="lazy"><figcaption>La barra dei menu</figcaption></figure>
+      <figure><img src="assets/riepilogo.png" alt="Riepilogo della sessione" loading="lazy"><figcaption>Il riepilogo a fine sessione</figcaption></figure>
+      <figure class="wide"><img src="assets/progressi.png" alt="Progressi: padronanza, streak e traguardi" loading="lazy"><figcaption>Progressi</figcaption></figure>
+      <figure class="wide"><img src="assets/statistiche.png" alt="Statistiche per linguaggio e concetto" loading="lazy"><figcaption>Statistiche</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">Esercizi</p>
+    <h2>Generati da Claude Haiku, con il tuo abbonamento</h2>
+    <ul class="plain">
+      <li>Gli esercizi li scrive Claude Haiku in una sessione nascosta di Claude Code, con il tuo abbonamento: mai con una API key.</li>
+      <li>Generano solo quando nessun agente lavora, entro un tetto giornaliero e settimanale che scegli tu.</li>
+      <li>Ogni esercizio viene verificato prima di arrivarti: la soluzione deve passare i test e il codice iniziale no.</li>
+      <li>Se colleghi un progetto, gli esercizi si ispirano al tuo codice, letto in sola lettura. Il codice dell'esercizio è sempre nuovo.</li>
+      <li>Senza Claude Code c'è comunque un pacchetto di esercizi incluso nell'app.</li>
+    </ul>
+  </section>
+
+  <section>
+    <p class="label">Privacy</p>
+    <ul class="plain">
+      <li>Progressi e statistiche restano sul tuo Mac. Nessun account, nessun server di slopcode.</li>
+      <li>Dagli hooks di Claude Code slopcode riceve l'evento, la cartella e il nome dei file toccati, mai le conversazioni.</li>
+      <li>Prima di modificare <code>~/.claude/settings.json</code> chiede il consenso e ne fa una copia. La disinstallazione toglie solo le righe aggiunte.</li>
+    </ul>
+  </section>
+
+  <section>
+    <p class="label">Installazione</p>
+    <h2>Requisiti</h2>
+    <ul class="plain">
+      <li>macOS 26 o successivo.</li>
+      <li><a href="https://docs.anthropic.com/en/docs/claude-code/setup">Claude Code</a> con un abbonamento Claude, per gli esercizi generati.</li>
+      <li>Per eseguire i test: <code>python3</code>, gli strumenti di Xcode per Swift (<code>xcode-select --install</code>), <code>kotlinc</code> e un JDK per Kotlin (<code>brew install kotlin openjdk</code>). Basta un linguaggio.</li>
+    </ul>
+    <h2 style="margin-top:28px">Primo avvio</h2>
+    <p class="notice">Questa versione non è ancora notarizzata da Apple: al primo avvio macOS dice che non può verificare lo sviluppatore. Si apre una volta sola così:</p>
+    <ol>
+      <li>Scarica <code>slopcode.zip</code>, aprilo e sposta <strong>slopcode</strong> in Applicazioni.</li>
+      <li>Apri l'app: macOS la blocca. Chiudi l'avviso.</li>
+      <li>Vai in Impostazioni di sistema › Privacy e sicurezza e, in fondo, premi <strong>Apri comunque</strong> accanto a slopcode.</li>
+      <li>La mascotte compare nella barra dei menu e parte una guida in sei passi.</li>
+    </ol>
+  </section>
+
+  <footer>
+    © 2026 slopcode · fatto per chi aspetta un agente · <a href="https://github.com/federix-ai/slopcode-app/releases">tutte le versioni</a>
+  </footer>
+</main>
+</body>
+</html>
