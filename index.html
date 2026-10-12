@@ -4,183 +4,462 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Slop2Skill</title>
-<meta name="description" content="Coding exercises while your AI agent works. A macOS menu bar app for Claude Code and Codex users.">
+<meta name="description" content="Coding exercises while your AI agent works. A free macOS menu bar app for Claude Code and Codex users.">
+<meta name="theme-color" content="#0A110E">
+<meta property="og:title" content="Slop2Skill: your agent is working, don't just wait">
+<meta property="og:description" content="A short coding exercise opens next to your terminal whenever Claude Code or Codex is busy. Free macOS menu bar app.">
+<meta property="og:image" content="https://federix-ai.github.io/slop2skill-app/assets/video/hero.jpg">
+<meta property="og:type" content="website">
 <link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #FAFAFA; --surface: #FFFFFF; --text: #1D1D1F; --text2: rgba(0,0,0,0.58); --text3: rgba(0,0,0,0.36);
-    --sep: rgba(0,0,0,0.08); --fill: rgba(0,0,0,0.045); --accent: #007AFF; --mint: #3E9F7A; --mint-text: #1F6B50;
-    --amber-bg: rgba(255,159,10,0.13); --amber-text: #7A4300;
-    --mono: "SF Mono", ui-monospace, Menlo, monospace;
+    color-scheme: dark;
+    --bg: #0A110E; --bg2: #0F1914; --surface: #131F19; --surface2: #182720; --line: rgba(166,235,207,0.12); --line2: rgba(166,235,207,0.22);
+    --text: #E9F3EE; --text2: #A3B8AD; --text3: #7C9388;
+    --mint: #7FD8B4; --mint2: #A6EBCF; --on-mint: #05130D; --mint-soft: rgba(127,216,180,0.12);
+    --amber: #FFD08A; --amber-bg: rgba(255,179,64,0.12);
+    --glow: rgba(127,216,180,0.16); --grid: rgba(166,235,207,0.045);
+    --shadow: 0 30px 80px -20px rgba(0,0,0,0.7);
+    --head: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
     --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    --mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace;
   }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #1E1E20; --surface: #28282A; --text: rgba(255,255,255,0.92); --text2: rgba(255,255,255,0.58); --text3: rgba(255,255,255,0.32);
-      --sep: rgba(255,255,255,0.08); --fill: rgba(255,255,255,0.06); --accent: #0A84FF; --mint: #7FD8B4; --mint-text: #A6EBCF;
-      --amber-bg: rgba(255,179,64,0.13); --amber-text: #FFD08A;
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      color-scheme: light;
+      --bg: #F3F8F5; --bg2: #E9F2ED; --surface: #FFFFFF; --surface2: #F0F6F3; --line: rgba(14,42,32,0.1); --line2: rgba(14,42,32,0.2);
+      --text: #0D1A14; --text2: #43574D; --text3: #5C7066;
+      --mint: #1F6B50; --mint2: #17533D; --on-mint: #FFFFFF; --mint-soft: rgba(31,107,80,0.09);
+      --amber: #7A4300; --amber-bg: rgba(255,159,10,0.14);
+      --glow: rgba(62,159,122,0.18); --grid: rgba(14,42,32,0.05);
+      --shadow: 0 30px 70px -25px rgba(14,42,32,0.35);
     }
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
-  main { max-width: 960px; margin: 0 auto; padding: 0 16px 64px; }
-  .label { font: 600 11px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin: 0 0 12px; }
-  a { color: var(--accent); }
+  html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  img, video { max-width: 100%; display: block; }
+  a { color: var(--mint); text-underline-offset: 3px; }
+  a:hover { color: var(--mint2); }
+  :focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; border-radius: 6px; }
+  .wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
+  .skip { position: absolute; left: 12px; top: -60px; background: var(--mint); color: var(--on-mint); padding: 8px 14px; border-radius: 8px; z-index: 100; font-weight: 600; text-decoration: none; }
+  .skip:focus { top: 12px; }
+  h1, h2, h3 { font-family: var(--head); margin: 0; letter-spacing: -0.02em; line-height: 1.1; }
+  code { font: 13px var(--mono); background: var(--mint-soft); color: var(--mint2); padding: 2px 6px; border-radius: 6px; }
+  svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
-  header { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 72px 0 40px; gap: 14px; }
-  header img { width: 128px; height: 128px; }
-  h1 { font-size: 40px; line-height: 1.1; letter-spacing: -0.02em; margin: 6px 0 0; }
-  .tagline { font-size: 19px; color: var(--text2); margin: 0; max-width: 560px; }
-  .download { display: inline-flex; align-items: center; gap: 10px; margin-top: 14px; padding: 12px 22px; border-radius: 10px;
-              background: var(--accent); color: #fff; font: 600 16px var(--sans); text-decoration: none; }
-  .download small { font: 12px var(--mono); opacity: 0.8; }
-  .meta { font: 12px var(--mono); color: var(--text3); }
+  /* ── nav ── */
+  nav.top { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 78%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  nav.top .wrap { display: flex; align-items: center; gap: 28px; height: 64px; }
+  .brand { display: flex; align-items: center; gap: 10px; font: 700 18px var(--head); color: var(--text); text-decoration: none; letter-spacing: -0.01em; }
+  .brand img { width: 30px; height: 30px; }
+  .links { display: flex; gap: 22px; margin-left: auto; }
+  .links a { color: var(--text2); text-decoration: none; font-size: 14px; font-weight: 500; padding: 6px 2px; }
+  .links a:hover { color: var(--text); }
 
-  section { padding: 36px 0; border-top: 1px solid var(--sep); }
-  h2 { font-size: 24px; letter-spacing: -0.015em; margin: 0 0 18px; }
-  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
-  .card { background: var(--fill); border-radius: 12px; padding: 18px; }
-  .card .num { font: 600 12px var(--mono); color: var(--mint-text); }
-  .card h3 { font-size: 16px; margin: 6px 0 6px; }
-  .card p { margin: 0; color: var(--text2); font-size: 14px; }
+  /* ── buttons ── */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 0 22px; border-radius: 12px; font: 600 15px var(--sans); text-decoration: none; cursor: pointer;
+         transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease; }
+  .btn.primary { background: var(--mint); color: var(--on-mint); box-shadow: 0 0 0 0 var(--glow), 0 8px 24px -8px var(--glow); }
+  .btn.primary:hover { color: var(--on-mint); transform: translateY(-2px); box-shadow: 0 0 0 6px var(--glow), 0 12px 28px -8px var(--glow); }
+  .btn.ghost { color: var(--text); border: 1px solid var(--line2); background: transparent; }
+  .btn.ghost:hover { color: var(--text); border-color: var(--mint); background: var(--mint-soft); }
+  .btn small { font: 500 12px var(--mono); opacity: .72; }
+  nav.top .btn { min-height: 38px; padding: 0 16px; font-size: 14px; border-radius: 10px; }
 
-  .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: start; }
-  .shots figure { margin: 0; }
-  .shots img { width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--sep); display: block; }
-  .shots figcaption { font: 12px var(--mono); color: var(--text3); margin-top: 8px; }
-  .wide { grid-column: 1 / -1; }
+  /* ── hero ── */
+  .hero { position: relative; padding: 72px 0 88px; isolation: isolate; }
+  .hero::before { content: ""; position: absolute; inset: 0; z-index: -1;
+    background: radial-gradient(60% 55% at 78% 30%, var(--glow), transparent 70%), radial-gradient(40% 40% at 8% 0%, var(--glow), transparent 70%),
+                linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 44px 44px, linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 44px 44px;
+    -webkit-mask-image: linear-gradient(#000 55%, transparent); mask-image: linear-gradient(#000 55%, transparent); }
+  .hero .wrap { display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font: 500 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--mint); background: var(--mint-soft); border: 1px solid var(--line2); padding: 6px 12px; border-radius: 999px; }
+  .eyebrow::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 0 var(--mint); animation: pulse 2s infinite; }
+  @keyframes pulse { 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+  h1 { font-size: clamp(42px, 6.2vw, 72px); font-weight: 700; margin: 20px 0 20px; }
+  h1 .m { color: var(--mint); }
+  .lede { font-size: clamp(17px, 2vw, 20px); color: var(--text2); max-width: 520px; margin: 0 0 30px; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 26px 0 0; padding: 0; list-style: none; font: 500 12.5px var(--mono); color: var(--text3); }
+  .chips li { display: flex; align-items: center; gap: 7px; }
+  .chips svg { width: 14px; height: 14px; color: var(--mint); }
 
-  .hero-video { margin: 8px 0 44px; }
-  video { width: 100%; height: auto; aspect-ratio: 16 / 9; display: block; border-radius: 12px; border: 1px solid var(--sep); background: #111113; }
-  .clips { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 22px 16px; }
-  .clips figure { margin: 0; }
-  .clips h3 { font-size: 16px; margin: 12px 0 4px; }
-  .clips p { margin: 0; color: var(--text2); font-size: 14px; }
+  .scene { position: relative; aspect-ratio: 1 / 1.12; width: 100%; max-width: 520px; margin-inline: auto; }
+  .term { position: absolute; left: 0; top: 0; width: 82%; border-radius: 14px; background: #0B0F0D; border: 1px solid rgba(166,235,207,0.16); box-shadow: var(--shadow); overflow: hidden; }
+  .term .bar { display: flex; align-items: center; gap: 6px; padding: 11px 14px; background: #131815; border-bottom: 1px solid rgba(255,255,255,0.06); font: 500 11px var(--mono); color: #8DA399; }
+  .term .bar i { width: 10px; height: 10px; border-radius: 50%; display: block; }
+  .term .bar span { margin-left: 8px; }
+  .term pre { margin: 0; padding: 16px 16px 76px; font: 12.5px/1.75 var(--mono); color: #DDE9E3; white-space: pre-wrap; }
+  .term .p { color: #7FD8B4; } .term .d { color: #7C9388; } .term .w { color: #FFD08A; }
+  .term .cur { display: inline-block; width: 7px; height: 14px; background: #DDE9E3; vertical-align: -2px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .win { position: absolute; right: 0; top: 14%; width: 52%; border-radius: 14px; border: 1px solid var(--line2); box-shadow: var(--shadow); background: #fff; }
+  .win img { border-radius: 13px; width: 100%; height: auto; }
+  .psst { position: absolute; left: 0; top: 64%; display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line2); border-radius: 14px; padding: 8px 14px 8px 8px; box-shadow: var(--shadow); font: 500 12px/1.4 var(--mono); color: var(--text); max-width: 45%; }
+  .psst img { width: 38px; height: 38px; flex: none; animation: bob 3s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-3px); } }
 
-  ul.plain { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
-  ul.plain li { display: flex; gap: 10px; color: var(--text2); }
-  ul.plain li::before { content: "·"; color: var(--mint); font-weight: 700; }
-  code { font: 13px var(--mono); background: var(--fill); padding: 1px 5px; border-radius: 4px; }
+  /* ── sections ── */
+  section { padding: 88px 0; }
+  .head { max-width: 640px; margin-bottom: 44px; }
+  .head.center { text-align: center; margin-inline: auto; max-width: 820px; }
+  .kicker { font: 500 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--mint); margin: 0 0 14px; }
+  h2 { font-size: clamp(30px, 4vw, 46px); font-weight: 700; }
+  .head p { color: var(--text2); font-size: 18px; margin: 16px 0 0; }
 
-  .notice { background: var(--amber-bg); color: var(--amber-text); border-radius: 10px; padding: 14px 16px; font-size: 14px; }
-  ol { padding-left: 20px; color: var(--text2); }
-  ol li { margin-bottom: 6px; }
-  footer { text-align: center; font: 12px var(--mono); color: var(--text3); padding-top: 28px; border-top: 1px solid var(--sep); }
+  .strip { border-block: 1px solid var(--line); background: var(--bg2); }
+  .strip .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .strip div.s { padding: 26px 20px; border-left: 1px solid var(--line); }
+  .strip div.s:first-child { border-left: 0; }
+  .strip b { display: block; font: 700 22px var(--head); letter-spacing: -0.01em; }
+  .strip span { font-size: 14px; color: var(--text2); }
+
+  .stage { position: relative; border-radius: 20px; padding: 10px; background: linear-gradient(160deg, var(--line2), transparent 60%); box-shadow: var(--shadow); }
+  .stage video { width: 100%; aspect-ratio: 16 / 9; border-radius: 12px; background: #0B0F0D; display: block; }
+  .clips { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 28px; }
+  .clip-card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 10px 10px 22px; transition: border-color .25s ease, transform .25s ease; }
+  .clip-card:hover { border-color: var(--line2); transform: translateY(-3px); }
+  .clip-card video { width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; background: #0B0F0D; display: block; }
+  .clip-card h3 { font-size: 19px; margin: 18px 12px 6px; }
+  .clip-card p { margin: 0 12px; color: var(--text2); font-size: 15px; }
+
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; counter-reset: s; }
+  .step { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 28px 26px 30px; overflow: hidden; }
+  .step::after { counter-increment: s; content: "0" counter(s); position: absolute; right: 18px; top: 4px; font: 700 84px var(--head); color: var(--mint); opacity: .07; line-height: 1; }
+  .ico { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; background: var(--mint-soft); color: var(--mint); border: 1px solid var(--line2); margin-bottom: 18px; }
+  .ico svg { width: 22px; height: 22px; }
+  .step h3, .feat h3 { font-size: 20px; margin-bottom: 8px; }
+  .step p, .feat p { margin: 0; color: var(--text2); font-size: 15px; }
+
+  .tabs { display: grid; grid-template-columns: 340px 1fr; gap: 28px; align-items: stretch; }
+  [role="tablist"] { display: flex; flex-direction: column; gap: 8px; }
+  [role="tab"] { text-align: left; font: inherit; color: var(--text2); background: transparent; border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; cursor: pointer; min-height: 44px; transition: border-color .2s, background .2s, color .2s; }
+  [role="tab"] b { display: block; font: 600 17px var(--head); color: var(--text); margin-bottom: 2px; }
+  [role="tab"] span { font-size: 14px; display: none; }
+  [role="tab"]:hover { border-color: var(--line2); }
+  [role="tab"][aria-selected="true"] { background: var(--surface); border-color: var(--mint); }
+  [role="tab"][aria-selected="true"] span { display: block; }
+  .panel { background: radial-gradient(70% 60% at 50% 40%, var(--glow), transparent 75%), var(--surface); border: 1px solid var(--line); border-radius: 20px; display: grid; place-items: center; padding: 28px; min-height: 480px; }
+  .panel figure { margin: 0; display: grid; place-items: center; width: 100%; }
+  .panel img { width: auto; height: auto; max-height: 560px; border-radius: 12px; border: 1px solid var(--line2); box-shadow: var(--shadow); }
+  .panel figcaption { display: none; }
+  html:not(.js) .panel figcaption { display: block; font: 12px var(--mono); color: var(--text3); margin: 10px 0 28px; }
+  html.js .panel[hidden] { display: none; }
+
+  .feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .feat { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 26px; transition: border-color .25s, transform .25s; }
+  .feat:hover { border-color: var(--line2); transform: translateY(-3px); }
+
+  .privacy { display: grid; grid-template-columns: 1fr 1.2fr; gap: 48px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: clamp(28px, 5vw, 56px); }
+  .privacy ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
+  .privacy li { display: flex; gap: 14px; color: var(--text2); }
+  .privacy li svg { color: var(--mint); margin-top: 3px; }
+  .privacy li b { color: var(--text); }
+
+  .install { display: grid; grid-template-columns: 1fr 1.1fr; gap: 28px; }
+  .box { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 30px; }
+  .box h3 { font-size: 22px; margin-bottom: 16px; }
+  .box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; color: var(--text2); font-size: 15px; }
+  .box ul li { display: flex; gap: 12px; }
+  .box ul li svg { color: var(--mint); margin-top: 3px; }
+  .notice { background: var(--amber-bg); color: var(--amber); border-radius: 12px; padding: 14px 16px; font-size: 14px; margin: 0 0 20px; }
+  ol.go { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; counter-reset: g; }
+  ol.go li { counter-increment: g; display: flex; gap: 14px; color: var(--text2); font-size: 15px; }
+  ol.go li::before { content: counter(g); flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 700 13px var(--mono); background: var(--mint-soft); color: var(--mint); border: 1px solid var(--line2); }
+  ol.go strong { color: var(--text); }
+
+  .final { text-align: center; border: 1px solid var(--line2); border-radius: 28px; padding: clamp(44px, 7vw, 84px) 24px; position: relative; overflow: hidden; isolation: isolate;
+           background: radial-gradient(60% 90% at 50% 0%, var(--glow), transparent 70%), var(--surface); }
+  .final img { width: 84px; height: 84px; margin: 0 auto 22px; animation: bob 3s ease-in-out infinite; }
+  .final h2 { margin-bottom: 14px; }
+  .final p { color: var(--text2); margin: 0 auto 30px; max-width: 460px; font-size: 18px; }
+  .final .cta { justify-content: center; }
+
+  footer { border-top: 1px solid var(--line); padding: 30px 0 44px; color: var(--text3); font: 13px var(--mono); }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+
+  /* reveal */
+  html.js .rv { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+  html.js .rv.in { opacity: 1; transform: none; }
+
+  @media (max-width: 940px) {
+    .hero { padding: 48px 0 64px; }
+    .hero .wrap { grid-template-columns: 1fr; gap: 44px; }
+    .steps, .feats { grid-template-columns: 1fr; }
+    .tabs, .privacy, .install { grid-template-columns: 1fr; }
+    [role="tablist"] { flex-direction: row; overflow-x: auto; padding-bottom: 4px; }
+    [role="tab"] { flex: none; }
+    [role="tab"] span, [role="tab"][aria-selected="true"] span { display: none; }
+    .links a:not(.btn) { display: none; }
+    section { padding: 64px 0; }
+  }
+  @media (max-width: 640px) {
+    .clips { grid-template-columns: 1fr; }
+    .strip .wrap { grid-template-columns: 1fr 1fr; }
+    .strip div.s:nth-child(3) { border-left: 0; }
+    .strip div.s:nth-child(n+3) { border-top: 1px solid var(--line); }
+    .term pre { font-size: 11px; padding-bottom: 56px; }
+    .panel { min-height: 0; padding: 18px; }
+    .panel img { max-height: 420px; }
+    nav.top .btn small { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    html.js .rv { opacity: 1; transform: none; }
+  }
 </style>
+<script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
-<main>
-  <header>
-    <img src="assets/icon.png" alt="Slop2Skill icon: the mascot on a dark squircle">
-    <h1>Slop2Skill</h1>
-    <p class="tagline">Coding practice while your AI agent works. When Claude Code is thinking, you're training.</p>
-    <a class="download" href="https://github.com/federix-ai/slop2skill-app/releases/latest/download/slop2skill.zip">
-      Download for macOS <small>v1.2.0 · zip</small>
-    </a>
-    <span class="meta">macOS 26 or later · Apple Silicon and Intel · free</span>
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="top" aria-label="Main">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="assets/icon.png" alt="" width="30" height="30">Slop2Skill</a>
+    <div class="links">
+      <a href="#how">How it works</a>
+      <a href="#screens">Screenshots</a>
+      <a href="#exercises">Exercises</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#install">Install</a>
+      <a class="btn primary" href="https://github.com/federix-ai/slop2skill-app/releases/latest/download/slop2skill.zip">Download</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">Free · macOS menu bar app</span>
+        <h1>Your agent is working.<br><span class="m">Don't just wait.</span></h1>
+        <p class="lede">Whenever Claude Code or Codex gets busy, Slop2Skill opens a short coding exercise next to your terminal. Train in the minutes you'd lose anyway.</p>
+        <div class="cta">
+          <a class="btn primary" href="https://github.com/federix-ai/slop2skill-app/releases/latest/download/slop2skill.zip">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+            Download for macOS <small>v1.2.0</small>
+          </a>
+          <a class="btn ghost" href="#demo">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 4 14 8-14 8z"/></svg>
+            Watch the demo
+          </a>
+        </div>
+        <ul class="chips">
+          <li><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>macOS 26+</li>
+          <li><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Apple Silicon &amp; Intel</li>
+          <li><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>No account</li>
+        </ul>
+      </div>
+
+      <div class="scene" aria-hidden="true">
+        <div class="term">
+          <div class="bar"><i style="background:#FF5F57"></i><i style="background:#FEBC2E"></i><i style="background:#28C840"></i><span>android-app — agent</span></div>
+<pre><span class="p">~/dev/android-app ❯</span> claude "add retry"
+
+<span class="w">●</span> Working… <span class="d">(esc to interrupt)</span>
+<span class="d">  ⎿ Reading SyncClient.kt</span>
+<span class="d">  ⎿ Editing RetryPolicy.kt</span>
+<span class="d">  ⎿ Running gradlew test</span> <span class="cur"></span></pre>
+        </div>
+        <div class="win"><img src="assets/finestra.png" alt="" width="779" height="1400"></div>
+        <div class="psst"><img src="assets/icon.png" alt="" width="38" height="38"><span>psst: your exercise is ready</span></div>
+      </div>
+    </div>
   </header>
 
-  <div class="hero-video">
-    <video controls playsinline preload="metadata" poster="assets/video/hero.jpg" aria-label="Slop2Skill in 40 seconds: an exercise opens while Claude Code works">
-      <source src="assets/video/hero.mp4" type="video/mp4">
-    </video>
+  <div class="strip">
+    <div class="wrap">
+      <div class="s"><b>Claude Code + Codex</b><span>Follows your agent</span></div>
+      <div class="s"><b>Python · Swift · Kotlin</b><span>Tests run on your Mac</span></div>
+      <div class="s"><b>Spaced reviews</b><span>Mastery per concept</span></div>
+      <div class="s"><b>100% local</b><span>No account, no servers</span></div>
+    </div>
   </div>
 
-  <section>
-    <p class="label">In action</p>
-    <h2>See it while your agent works</h2>
-    <div class="clips">
-      <figure>
-        <video class="clip" muted loop playsinline preload="none" poster="assets/video/agent-works.jpg" aria-label="An exercise opens next to the terminal while Claude Code works"><source src="assets/video/agent-works.mp4" type="video/mp4"></video>
-        <h3>Reps while your agent works</h3>
-        <p>Claude Code starts a task and a short exercise opens next to your terminal. Run the tests with ⌘R.</p>
-      </figure>
-      <figure>
-        <video class="clip" muted loop playsinline preload="none" poster="assets/video/your-codebase.jpg" aria-label="A find-the-bug exercise built from a file in the project"><source src="assets/video/your-codebase.mp4" type="video/mp4"></video>
-        <h3>Exercises from your own code</h3>
-        <p>Inspired by the files your agent is touching, rewritten from scratch. Your project is only read, never changed.</p>
-      </figure>
-      <figure>
-        <video class="clip" muted loop playsinline preload="none" poster="assets/video/menu-bar.jpg" aria-label="The menu bar shows the agent waiting for a permission"><source src="assets/video/menu-bar.mp4" type="video/mp4"></video>
-        <h3>It follows your agent from the menu bar</h3>
-        <p>When the agent needs you, the icon tells you. The exercise waits where you left it.</p>
-      </figure>
-      <figure>
-        <video class="clip" muted loop playsinline preload="none" poster="assets/video/grow.jpg" aria-label="The mascot grows through its four stages"><source src="assets/video/grow.mp4" type="video/mp4"></video>
-        <h3>Every wait you use grows your slop</h3>
-        <p>Mastery per concept, spaced reviews and a mascot that grows with the hours you win back.</p>
-      </figure>
+  <section id="demo">
+    <div class="wrap">
+      <div class="head center rv">
+        <p class="kicker">See it in action</p>
+        <h2>40 seconds, from prompt to practice</h2>
+      </div>
+      <div class="stage rv">
+        <video controls playsinline preload="metadata" poster="assets/video/hero.jpg" aria-label="Slop2Skill in 40 seconds: an exercise opens while Claude Code works">
+          <source src="assets/video/hero.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="clips">
+        <figure class="clip-card rv" style="margin:0">
+          <video class="clip" muted loop playsinline preload="none" poster="assets/video/agent-works.jpg" aria-label="An exercise opens next to the terminal while Claude Code works"><source src="assets/video/agent-works.mp4" type="video/mp4"></video>
+          <h3>Reps while your agent works</h3>
+          <p>Claude Code starts a task and a short exercise opens next to your terminal. Run the tests with ⌘R.</p>
+        </figure>
+        <figure class="clip-card rv" style="margin:0">
+          <video class="clip" muted loop playsinline preload="none" poster="assets/video/your-codebase.jpg" aria-label="A find-the-bug exercise built from a file in the project"><source src="assets/video/your-codebase.mp4" type="video/mp4"></video>
+          <h3>Exercises from your own code</h3>
+          <p>Inspired by the files your agent is touching, rewritten from scratch. Your project is only read, never changed.</p>
+        </figure>
+        <figure class="clip-card rv" style="margin:0">
+          <video class="clip" muted loop playsinline preload="none" poster="assets/video/menu-bar.jpg" aria-label="The menu bar shows the agent waiting for a permission"><source src="assets/video/menu-bar.mp4" type="video/mp4"></video>
+          <h3>It follows your agent from the menu bar</h3>
+          <p>When the agent needs you, the icon tells you. The exercise waits where you left it.</p>
+        </figure>
+        <figure class="clip-card rv" style="margin:0">
+          <video class="clip" muted loop playsinline preload="none" poster="assets/video/grow.jpg" aria-label="The mascot grows through its four stages"><source src="assets/video/grow.mp4" type="video/mp4"></video>
+          <h3>Every wait you use grows your slop</h3>
+          <p>Mastery per concept, spaced reviews and a mascot that grows with the hours you win back.</p>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" style="background:var(--bg2);border-block:1px solid var(--line)">
+    <div class="wrap">
+      <div class="head rv">
+        <p class="kicker">How it works</p>
+        <h2>Turn agent wait time into practice</h2>
+      </div>
+      <div class="steps">
+        <div class="step rv">
+          <div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg></div>
+          <h3>Your agent gets to work</h3>
+          <p>Slop2Skill notices when Claude Code (or Codex) starts working and opens a slim window next to your terminal, without stealing focus.</p>
+        </div>
+        <div class="step rv">
+          <div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></div>
+          <h3>A short exercise</h3>
+          <p>Write a function, find the bug or answer a question in Python, Swift or Kotlin. Tests run locally on your Mac.</p>
+        </div>
+        <div class="step rv">
+          <div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 7 13.5 15.5l-5-5L2 17"/><path d="M16 7h6v6"/></svg></div>
+          <h3>Grow with the time you win back</h3>
+          <p>Mastery per concept, spaced reviews, a pressure-free streak and a mascot that grows with the hours of waiting you put to use.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="screens">
+    <div class="wrap">
+      <div class="head rv">
+        <p class="kicker">Screenshots</p>
+        <h2>Small window, real practice</h2>
+      </div>
+      <div class="tabs rv">
+        <div role="tablist" aria-label="Screenshots">
+          <button role="tab" id="t0" aria-controls="p0" aria-selected="true"><b>The exercise window</b><span>A slim window next to your terminal: a question, a bug hunt or a function to write, with hints and ⌘R to run the tests.</span></button>
+          <button role="tab" id="t1" aria-controls="p1" aria-selected="false" tabindex="-1"><b>The menu bar</b><span>Every agent session at a glance. The icon tells you when the agent needs you.</span></button>
+          <button role="tab" id="t2" aria-controls="p2" aria-selected="false" tabindex="-1"><b>Session summary</b><span>At the end of a wait, see what you practiced and the time you won back.</span></button>
+          <button role="tab" id="t3" aria-controls="p3" aria-selected="false" tabindex="-1"><b>Progress</b><span>Mastery, streak and milestones, without pressure.</span></button>
+          <button role="tab" id="t4" aria-controls="p4" aria-selected="false" tabindex="-1"><b>Statistics</b><span>A breakdown by language and concept, so you see what is sticking.</span></button>
+        </div>
+        <div>
+          <div class="panel" role="tabpanel" id="p0" aria-labelledby="t0" tabindex="0"><figure><img src="assets/finestra.png" alt="Exercise window while the agent waits for an answer" width="779" height="1400" loading="lazy"><figcaption>The exercise window</figcaption></figure></div>
+          <div class="panel" role="tabpanel" id="p1" aria-labelledby="t1" tabindex="0" hidden><figure><img src="assets/menu.png" alt="Menu bar menu with two agent sessions" width="518" height="1400" loading="lazy"><figcaption>The menu bar</figcaption></figure></div>
+          <div class="panel" role="tabpanel" id="p2" aria-labelledby="t2" tabindex="0" hidden><figure><img src="assets/riepilogo.png" alt="Session summary" width="1400" height="1234" loading="lazy"><figcaption>The end-of-session summary</figcaption></figure></div>
+          <div class="panel" role="tabpanel" id="p3" aria-labelledby="t3" tabindex="0" hidden><figure><img src="assets/progressi.png" alt="Progress: mastery, streak and milestones" width="1341" height="1400" loading="lazy"><figcaption>Progress</figcaption></figure></div>
+          <div class="panel" role="tabpanel" id="p4" aria-labelledby="t4" tabindex="0" hidden><figure><img src="assets/statistiche.png" alt="Statistics by language and concept" width="1400" height="1089" loading="lazy"><figcaption>Statistics</figcaption></figure></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="exercises" style="background:var(--bg2);border-block:1px solid var(--line)">
+    <div class="wrap">
+      <div class="head rv">
+        <p class="kicker">Exercises</p>
+        <h2>Written by Claude Haiku, on your own subscription</h2>
+        <p>Fresh exercises, checked before they reach you, generated only when your agent is idle.</p>
+      </div>
+      <div class="feats">
+        <div class="feat rv"><div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.8L20 10.7l-5 3.6 1.8 6L12 17l-4.8 3.3 1.8-6-5-3.6 6.1-1.9z"/></svg></div><h3>Hidden Haiku session</h3><p>Generated by Claude Haiku in a hidden Claude Code session with your Claude subscription, never an API key.</p></div>
+        <div class="feat rv"><div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h3>Only when the agent is idle</h3><p>Generation runs while no agent is working, within the daily and weekly limits you choose.</p></div>
+        <div class="feat rv"><div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></div><h3>Verified before you see it</h3><p>The reference solution must pass the tests and the starter code must not.</p></div>
+        <div class="feat rv"><div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><h3>Inspired by your code</h3><p>Connect a project and exercises draw on your own files, read strictly read-only. The exercise code is always new.</p></div>
+        <div class="feat rv"><div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div><h3>Works out of the box</h3><p>No Claude Code yet? A built-in pack of exercises is ready from the first launch.</p></div>
+        <div class="feat rv"><div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div><h3>Three languages</h3><p>Python, Swift and Kotlin. One language is enough to get going.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="privacy">
+    <div class="wrap">
+      <div class="privacy rv">
+        <div>
+          <p class="kicker">Privacy</p>
+          <h2>Stays on your Mac</h2>
+        </div>
+        <ul>
+          <li><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/></svg><span><b>No account, no servers.</b> Progress and statistics never leave your Mac.</span></li>
+          <li><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><span><b>Never your conversations.</b> From Claude Code hooks it receives the event, the folder and the names of the files touched.</span></li>
+          <li><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/></svg><span><b>Asks before editing</b> <code>~/.claude/settings.json</code> and makes a backup first. Uninstalling removes only the lines it added.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="install" style="background:var(--bg2);border-block:1px solid var(--line)">
+    <div class="wrap">
+      <div class="head rv">
+        <p class="kicker">Install</p>
+        <h2>Up and running in a minute</h2>
+      </div>
+      <div class="install">
+        <div class="box rv">
+          <h3>Requirements</h3>
+          <ul>
+            <li><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>macOS 26 or later. The app is available in English and Italian.</span></li>
+            <li><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><a href="https://docs.anthropic.com/en/docs/claude-code/setup">Claude Code</a> with a Claude subscription, for generated exercises.</span></li>
+            <li><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>To run tests: <code>python3</code>, Xcode's command line tools for Swift (<code>xcode-select --install</code>), <code>kotlinc</code> plus a JDK for Kotlin (<code>brew install kotlin openjdk</code>).</span></li>
+          </ul>
+        </div>
+        <div class="box rv">
+          <h3>First launch</h3>
+          <p class="notice">This version is not notarized by Apple yet, so macOS says it can't verify the developer. You only need to allow it once.</p>
+          <ol class="go">
+            <li><span>Download <code>slop2skill.zip</code>, open it and move <strong>Slop2Skill</strong> to Applications.</span></li>
+            <li><span>Open the app: macOS blocks it. Dismiss the alert.</span></li>
+            <li><span>Go to System Settings › Privacy &amp; Security and, near the bottom, click <strong>Open Anyway</strong> next to Slop2Skill.</span></li>
+            <li><span>The mascot appears in the menu bar and a six-step setup starts.</span></li>
+          </ol>
+        </div>
+      </div>
     </div>
   </section>
 
   <section>
-    <p class="label">How it works</p>
-    <h2>Turn agent wait time into practice</h2>
-    <div class="steps">
-      <div class="card"><span class="num">01</span><h3>Your agent gets to work</h3><p>Slop2Skill notices when Claude Code (or Codex) starts working and opens a slim window next to your terminal, without stealing focus.</p></div>
-      <div class="card"><span class="num">02</span><h3>A short exercise</h3><p>Write a function, find the bug or answer a question in Python, Swift or Kotlin. Tests run locally on your Mac.</p></div>
-      <div class="card"><span class="num">03</span><h3>Grow with the time you win back</h3><p>Mastery per concept, spaced reviews, a pressure-free streak and a mascot that grows with the hours of waiting you put to use.</p></div>
+    <div class="wrap">
+      <div class="final rv">
+        <img src="assets/icon.png" alt="" width="84" height="84">
+        <h2>Your next wait is a workout</h2>
+        <p>Free for macOS. Download it, let your agent loose, and practice while it works.</p>
+        <div class="cta">
+          <a class="btn primary" href="https://github.com/federix-ai/slop2skill-app/releases/latest/download/slop2skill.zip">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+            Download for macOS <small>v1.2.0</small>
+          </a>
+        </div>
+      </div>
     </div>
   </section>
-
-  <section>
-    <p class="label">Screenshots</p>
-    <div class="shots">
-      <figure><img src="assets/finestra.png" alt="Exercise window while the agent waits for an answer" loading="lazy"><figcaption>The exercise window</figcaption></figure>
-      <figure><img src="assets/menu.png" alt="Menu bar menu with two agent sessions" loading="lazy"><figcaption>The menu bar</figcaption></figure>
-      <figure><img src="assets/riepilogo.png" alt="Session summary" loading="lazy"><figcaption>The end-of-session summary</figcaption></figure>
-      <figure class="wide"><img src="assets/progressi.png" alt="Progress: mastery, streak and milestones" loading="lazy"><figcaption>Progress</figcaption></figure>
-      <figure class="wide"><img src="assets/statistiche.png" alt="Statistics by language and concept" loading="lazy"><figcaption>Statistics</figcaption></figure>
-    </div>
-  </section>
-
-  <section>
-    <p class="label">Exercises</p>
-    <h2>Written by Claude Haiku, on your own subscription</h2>
-    <ul class="plain">
-      <li>Exercises are generated by Claude Haiku in a hidden Claude Code session using your Claude subscription, never an API key.</li>
-      <li>Generation only runs while no agent is working, within the daily and weekly limits you choose.</li>
-      <li>Every exercise is checked before it reaches you: the reference solution must pass the tests and the starter code must not.</li>
-      <li>Connect a project and exercises are inspired by your own code, read strictly read-only. The exercise code is always new.</li>
-      <li>No Claude Code yet? A built-in pack of exercises works out of the box.</li>
-    </ul>
-  </section>
-
-  <section>
-    <p class="label">Privacy</p>
-    <ul class="plain">
-      <li>Progress and statistics stay on your Mac. No account, no Slop2Skill servers.</li>
-      <li>From Claude Code hooks, Slop2Skill receives the event, the folder and the names of the files touched, never your conversations.</li>
-      <li>It asks before editing <code>~/.claude/settings.json</code> and makes a backup first. Uninstalling removes only the lines it added.</li>
-    </ul>
-  </section>
-
-  <section>
-    <p class="label">Install</p>
-    <h2>Requirements</h2>
-    <ul class="plain">
-      <li>macOS 26 or later. The app is available in English and Italian.</li>
-      <li><a href="https://docs.anthropic.com/en/docs/claude-code/setup">Claude Code</a> with a Claude subscription, for generated exercises.</li>
-      <li>To run tests: <code>python3</code>, Xcode's command line tools for Swift (<code>xcode-select --install</code>), <code>kotlinc</code> plus a JDK for Kotlin (<code>brew install kotlin openjdk</code>). One language is enough.</li>
-    </ul>
-    <h2 style="margin-top:28px">First launch</h2>
-    <p class="notice">This version is not notarized by Apple yet, so on first launch macOS says it can't verify the developer. You only need to allow it once:</p>
-    <ol>
-      <li>Download <code>slop2skill.zip</code>, open it and move <strong>Slop2Skill</strong> to Applications.</li>
-      <li>Open the app: macOS blocks it. Dismiss the alert.</li>
-      <li>Go to System Settings › Privacy &amp; Security and, near the bottom, click <strong>Open Anyway</strong> next to Slop2Skill.</li>
-      <li>The mascot appears in the menu bar and a six-step setup starts.</li>
-    </ol>
-  </section>
-
-  <footer>
-    © 2026 Slop2Skill · made for people waiting on an agent · <a href="https://github.com/federix-ai/slop2skill-app/releases">all releases</a>
-  </footer>
 </main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Slop2Skill · made for people waiting on an agent</span>
+    <a href="https://github.com/federix-ai/slop2skill-app/releases">all releases</a>
+  </div>
+</footer>
+
 <script>
   // Clips play muted while on screen; with reduced motion they get controls instead.
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const clips = document.querySelectorAll('video.clip');
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+  if (reduce || !('IntersectionObserver' in window)) {
     clips.forEach(v => { v.controls = true; });
   } else {
     const io = new IntersectionObserver(entries => entries.forEach(e => {
@@ -189,6 +468,37 @@
     }), { threshold: 0.5 });
     clips.forEach(v => io.observe(v));
   }
+
+  // Fade-in on scroll.
+  const rv = document.querySelectorAll('.rv');
+  if (reduce || !('IntersectionObserver' in window)) rv.forEach(el => el.classList.add('in'));
+  else {
+    const ro = new IntersectionObserver(entries => entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); }
+    }), { threshold: 0.12 });
+    rv.forEach(el => ro.observe(el));
+  }
+
+  // Screenshot tabs (arrow keys, Home/End).
+  const tabs = [...document.querySelectorAll('[role="tab"]')];
+  function select(i, focus) {
+    tabs.forEach((t, n) => {
+      const on = n === i;
+      t.setAttribute('aria-selected', on);
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    });
+    if (focus) tabs[i].focus();
+  }
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => select(i));
+    t.addEventListener('keydown', e => {
+      const k = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+      if (k) { e.preventDefault(); select((i + k + tabs.length) % tabs.length, true); }
+      else if (e.key === 'Home') { e.preventDefault(); select(0, true); }
+      else if (e.key === 'End') { e.preventDefault(); select(tabs.length - 1, true); }
+    });
+  });
 </script>
 </body>
 </html>
